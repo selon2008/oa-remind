@@ -1,0 +1,52 @@
+# ============================================================
+# OA 安全填报 每周四定时提醒 - GitHub Actions 云端定时配置
+# 触发时间：每周四(北京时间) 09:00 与 15:00 各推送一次
+# 功能：自动跳过 2026 年法定节假日（周四若放假则不提醒）
+# 用法：把本文件放到 GitHub 仓库的 .github/workflows/ 目录下即可
+# ============================================================
+name: OA安全填报周四提醒
+
+on:
+  schedule:
+    # cron 使用 UTC 时间；北京 09:00 = UTC 01:00, 北京 15:00 = UTC 07:00, 每周四
+    - cron: "0 1,7 * * 4"
+  workflow_dispatch: {}   # 支持手动触发，便于测试
+
+jobs:
+  remind:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 判断今天是否为 工作日周四（跳过2026法定节假日）
+        id: check
+        env:
+          TZ: Asia/Shanghai
+        run: |
+          TODAY=$(date +%F)
+          WEEKDAY=$(date +%u)          # 4 表示周四
+          IS_HOLIDAY=0
+          # 2026 年法定节假日日期（周四若命中这里则跳过），来源：国务院办公厅通知
+          HOLIDAYS="2026-01-01 2026-01-02 2026-01-03 \
+          2026-02-15 2026-02-16 2026-02-17 2026-02-18 2026-02-19 2026-02-20 2026-02-21 2026-02-22 2026-02-23 \
+          2026-04-04 2026-04-05 2026-04-06 \
+          2026-05-01 2026-05-02 2026-05-03 2026-05-04 2026-05-05 \
+          2026-06-19 2026-06-20 2026-06-21 \
+          2026-09-25 2026-09-26 2026-09-27 \
+          2026-10-01 2026-10-02 2026-10-03 2026-10-04 2026-10-05 2026-10-06 2026-10-07"
+          for d in $HOLIDAYS; do
+            [ "$TODAY" = "$d" ] && IS_HOLIDAY=1
+          done
+          if [ "$WEEKDAY" = "4" ] && [ "$IS_HOLIDAY" = "0" ]; then
+            echo "today_ok=true" >> "$GITHUB_OUTPUT"
+            echo "今天是周四且非节假日，将发送提醒"
+          else
+            echo "today_ok=false" >> "$GITHUB_OUTPUT"
+            echo "今天不是工作日周四，跳过"
+          fi
+
+      - name: 通过工作提醒AIbot 推送 OA 填报提醒
+        if: steps.check.outputs.today_ok == 'true'
+        run: |
+          curl -s -X POST \
+            "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=429941c0-f7cb-4ad6-85a3-701d675763af" \
+            -H "Content-Type: application/json" \
+            -d '{"msgtype":"text","text":{"content":"工作提醒：老板，今天是周四，请记得完成 OA 班组安全填报！"}}'
