@@ -1,0 +1,49 @@
+# ============================================================
+# 燕山大学 设计学类26-2 每日课程提醒 - GitHub Actions 云端定时配置
+# 触发：
+#   每天早上 07:00(北京) 推送当天课程   -> cron UTC 0 23 * * *
+#   每天晚上 19:00(北京) 推送第二天课程 -> cron UTC 0 11 * * *
+# 推送对象：企业微信机器人（私人定制群）
+# 数据：course_reminder.py（内嵌 2026-2027 秋季学期完整排课）
+# 用法：放置于仓库 .github/workflows/ 目录
+# ============================================================
+name: 课程每日提醒
+
+on:
+  schedule:
+    - cron: "0 23 * * *"   # 北京 07:00 -> 当天课程
+    - cron: "0 11 * * *"   # 北京 19:00 -> 明天课程
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 手动触发模式
+        required: true
+        default: today
+        type: choice
+        options:
+          - today
+          - tomorrow
+
+jobs:
+  remind:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 早上7点 - 推送当天课程
+        if: ${{ github.event.schedule == '0 23 * * *' }}
+        env:
+          TZ: Asia/Shanghai
+        run: python3 course_reminder.py --mode today
+
+      - name: 晚上7点 - 推送明天课程
+        if: ${{ github.event.schedule == '0 11 * * *' }}
+        env:
+          TZ: Asia/Shanghai
+        run: python3 course_reminder.py --mode tomorrow
+
+      - name: 手动触发 - 按所选模式
+        if: ${{ github.event_name == 'workflow_dispatch' }}
+        env:
+          TZ: Asia/Shanghai
+        run: python3 course_reminder.py --mode ${{ github.event.inputs.mode }}
