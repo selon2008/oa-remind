@@ -1,0 +1,24 @@
+# ============================================================
+# 每日次日秦皇岛天气提醒 - GitHub Actions 云端定时配置
+# 触发：每天晚上 20:00(北京) 推送第二天秦皇岛天气 -> cron UTC 0 12 * * *
+# 推送对象：企业微信机器人（私人订制--妮妮燕大 群）
+# 数据：weather_reminder.py（Open-Meteo 免费天气 API）
+# 用法：放置于仓库 .github/workflows/ 目录
+# ============================================================
+name: 次日秦皇岛天气提醒
+
+on:
+  schedule:
+    - cron: "0 12 * * *"   # 北京 20:00 -> 次日天气
+  workflow_dispatch: {}
+
+jobs:
+  remind:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 晚上8点 - 推送次日秦皇岛天气
+        env:
+          TZ: Asia/Shanghai
+        run: python3 weather_reminder.py
