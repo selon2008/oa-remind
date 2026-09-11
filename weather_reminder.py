@@ -28,6 +28,27 @@ WMO = {
 
 WEEK = ["周一", "周二", "周三", "周四", "周五", "周六", "周日"]
 
+# 军训期：2026-09-11 ~ 09-24；次日推送若落在此范围内附加军训提示
+MILITARY_START = date(2026, 9, 11)
+MILITARY_END = date(2026, 9, 24)
+# 军训晚间活动（按日），用于提示
+MILITARY_EVENING = {
+    (9, 11): "军训动员大会",
+    (9, 12): "各学院召开军训主题班会",
+    (9, 13): "内务整理",
+    (9, 14): "校歌军歌学唱",
+    (9, 15): "校歌军歌学唱",
+    (9, 16): "内务整理",
+    (9, 17): "军训慰问演出(东校区同步开始)",
+    (9, 18): "校歌军歌学唱",
+    (9, 19): "迎新晚会、音乐思政课",
+    (9, 20): "内务整理",
+    (9, 21): "校歌军歌学唱",
+    (9, 22): "校歌军歌大赛",
+    (9, 23): "内务评比大赛",
+    (9, 24): "军训总结大会",
+}
+
 def fetch_tomorrow():
     url = (f"https://api.open-meteo.com/v1/forecast?latitude={LAT}&longitude={LON}"
            f"&daily=weather_code,temperature_2m_max,temperature_2m_min,wind_speed_10m_max"
@@ -68,8 +89,15 @@ def build_message(w):
         tip = "天气较热，注意补水防晒"
     if tip:
         tip = "，" + tip
-    return (f"晚上好老板，明天（{w['date']} {weekday}）秦皇岛天气：{wmo_desc}，"
-            f"气温 {w['tmin']}~{w['tmax']}℃，风力{lv}级（最大风速约{w['wind']}km/h）{tip}。")
+    msg = (f"晚上好老板，明天（{w['date']} {weekday}）秦皇岛天气：{wmo_desc}，"
+           f"气温 {w['tmin']}~{w['tmax']}℃，风力{lv}级（最大风速约{w['wind']}km/h）{tip}。")
+    # 军训期附加提示：明日在军训期内则附带作息提醒
+    if MILITARY_START <= dt <= MILITARY_END:
+        day_no = (dt - MILITARY_START).days + 1
+        evening = MILITARY_EVENING.get((dt.month, dt.day), "按通知")
+        msg += (f"另：明天是军训第{day_no}天，白天操课注意防晒补水、备好水壶，"
+                f"晚上活动[{evening}]，操课请提前5分钟到集合点。")
+    return msg
 
 def datetime_date(s):
     y, m, dd = map(int, s.split("-"))
