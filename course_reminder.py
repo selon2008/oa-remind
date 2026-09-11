@@ -95,6 +95,55 @@ SCHEDULE = {
     ],
 }
 
+# ----------------------- 军训安排 (2026-09-11 ~ 09-24) -----------------------
+MILITARY_START = date(2026, 9, 11)
+MILITARY_END = date(2026, 9, 24)
+
+# 固定每日作息（第一张图）
+MILITARY_RHYTHM = [
+    "6:30 起床",
+    "6:30-7:00 洗漱、整理内务、打扫卫生",
+    "7:00-8:00 早饭",
+    "8:00-11:40 操课",
+    "11:40-13:30 午饭、午休",
+    "14:00-18:00 操课",
+    "18:00-19:00 晚饭",
+    "19:00-21:00 操课",
+    "22:00 就寝",
+]
+
+# 每日活动（第二张图）：key=(月,日) -> (上午, 下午, 晚上)
+MILITARY_DAILY = {
+    (9, 11): ("操课", "操课", "军训动员大会"),
+    (9, 12): ("操课", "操课", "各学院召开军训主题班会"),
+    (9, 13): ("操课", "操课", "内务整理"),
+    (9, 14): ("操课", "操课", "校歌军歌学唱"),
+    (9, 15): ("操课", "操课", "校歌军歌学唱"),
+    (9, 16): ("海港区分送兵大会(暂定)", "操课", "内务整理"),
+    (9, 17): ("操课", "操课", "军训慰问演出(东校区同步开始)"),
+    (9, 18): ("操课", "操课", "校歌军歌学唱"),
+    (9, 19): ("长征胜利90周年主题讲座", "行军拉练(东校区)", "迎新晚会、音乐思政课"),
+    (9, 20): ("操课", "行军拉练(西校区)", "内务整理"),
+    (9, 21): ("操课", "操课", "校歌军歌学唱"),
+    (9, 22): ("安全教育", "操课", "校歌军歌大赛"),
+    (9, 23): ("操课", "操课", "内务评比大赛"),
+    (9, 24): ("操课", "无", "军训总结大会"),
+}
+
+def build_military_message(target, amt):
+    """军训期推送：固定作息 + 当日活动"""
+    tw = target.weekday()
+    day_no = (target - MILITARY_START).days + 1
+    header = f"老板,{amt} {target.month}月{target.day}日(星期{weekday_cn(tw)})军训第{day_no}天"
+    lines = [f"{header}作息安排如下:"]
+    for item in MILITARY_RHYTHM:
+        lines.append(f"- {item}")
+    m, d = target.month, target.day
+    a, p, e = MILITARY_DAILY.get((m, d), ("操课", "操课", "按通知"))
+    lines.append(f"当日活动:上午[{a}],下午[{p}],晚上[{e}]")
+    lines.append("提醒:操课提前5分钟在指定地点集合。")
+    return "\n".join(lines)
+
 # ----------------------- 辅助函数 -----------------------
 def parse_weeks(s):
     """'1,5-8,10' -> set{1,5,6,7,8,10}"""
@@ -125,6 +174,11 @@ def build_message(mode):
     tw = target.weekday()
     week = get_week(target)
     amt = "今天" if mode == "today" else "明天"
+
+    # 军训期：优先推送军训作息安排
+    if MILITARY_START <= target <= MILITARY_END:
+        return build_military_message(target, amt)
+
     header = f"老板,{amt} {target.month}月{target.day}日(星期{weekday_cn(tw)})"
 
     # 周末或不在学期内 -> 全天无课
