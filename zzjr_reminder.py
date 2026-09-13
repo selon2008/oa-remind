@@ -6,9 +6,11 @@
 定时触发方案：
   - 周六 20:30  推送第二天(周日)课程 + 周日武汉天气
   - 周日 08:30  推送当天(周日)课程 + 当天武汉天气
+  - 周日 12:00  推送午饭提醒（12:30 去南国西汇带仔仔吃午饭）
+  - 周日 13:15  推送下午上课提醒（13:30 数学·史老师班）
   - 周日 16:30  推送当天(周日)课程 + 当天武汉天气 + 接送提醒
 用法：
-  python3 zzjr_reminder.py --mode saturday|sunday_morning|sunday_afternoon
+  python3 zzjr_reminder.py --mode saturday|sunday_morning|sunday_lunch|sunday_class_start|sunday_afternoon
   python3 zzjr_reminder.py --mode saturday --dry-run   # 只打印不发群
 """
 import argparse, json, sys, urllib.request
@@ -98,6 +100,10 @@ def build_message(mode, w):
                 f"当前课程：15:40-17:40 化学（焦老师班）进行中，17:40 下课请到点接回仔仔。\n"
                 f"全天课程回顾：\n{class_lines()}\n"
                 f"【天气】{weather_line(w)}")
+    if mode == "sunday_lunch":
+        return (f"老板，英语课 12:30 下课了。12:30 去南国西汇带仔仔吃午饭。")
+    if mode == "sunday_class_start":
+        return (f"老板，13:30 下午上课了（数学·史老师班），请提前送仔仔到校。")
     raise ValueError(mode)
 
 def send(content):
@@ -110,7 +116,7 @@ def send(content):
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
-    ap.add_argument("--mode", choices=["saturday", "sunday_morning", "sunday_afternoon"], required=True)
+    ap.add_argument("--mode", choices=["saturday", "sunday_morning", "sunday_lunch", "sunday_class_start", "sunday_afternoon"], required=True)
     ap.add_argument("--dry-run", action="store_true")
     args = ap.parse_args()
 
