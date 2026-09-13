@@ -13,6 +13,8 @@ on:
   schedule:
     - cron: "30 12 * * 6"   # 北京 周六 20:30 -> 明天(周日)课程
     - cron: "30 0 * * 0"    # 北京 周日 08:30 -> 当天课程
+    - cron: "0 4 * * 0"     # 北京 周日 12:00 -> 午饭接送提醒
+    - cron: "15 5 * * 0"    # 北京 周日 13:15 -> 下午上课提醒
     - cron: "30 8 * * 0"    # 北京 周日 16:30 -> 当天课程+接送提醒
   workflow_dispatch:
     inputs:
@@ -24,6 +26,8 @@ on:
         options:
           - saturday
           - sunday_morning
+          - sunday_lunch
+          - sunday_class_start
           - sunday_afternoon
 
 jobs:
@@ -43,6 +47,18 @@ jobs:
         env:
           TZ: Asia/Shanghai
         run: python3 zzjr_reminder.py --mode sunday_morning
+
+      - name: 周日12:00 - 推送午饭提醒
+        if: ${{ github.event.schedule == '0 4 * * 0' }}
+        env:
+          TZ: Asia/Shanghai
+        run: python3 zzjr_reminder.py --mode sunday_lunch
+
+      - name: 周日13:15 - 推送下午上课提醒
+        if: ${{ github.event.schedule == '15 5 * * 0' }}
+        env:
+          TZ: Asia/Shanghai
+        run: python3 zzjr_reminder.py --mode sunday_class_start
 
       - name: 周日16:30 - 推送当天课程+天气+接送
         if: ${{ github.event.schedule == '30 8 * * 0' }}
