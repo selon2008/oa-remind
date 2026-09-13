@@ -1,0 +1,57 @@
+# ============================================================
+# 仔仔(李思远)周日捷豹秋季课 + 武汉天气 提醒 - GitHub Actions 云端定时配置
+# 触发（北京时间）：
+#   周六 20:30 -> 推送第二天(周日)课程 + 周日武汉天气
+#   周日 08:30 -> 推送当天(周日)课程 + 当天武汉天气
+#   周日 16:30 -> 推送当天(周日)课程 + 当天武汉天气 + 到点接送提醒
+# 推送对象：企业微信机器人（私人订制消息--仔仔京汉）
+# 数据：zzjr_reminder.py（内嵌周日固定三节课表）
+# ============================================================
+name: 仔仔周日课表天气提醒
+
+on:
+  schedule:
+    - cron: "30 12 * * 6"   # 北京 周六 20:30 -> 明天(周日)课程
+    - cron: "30 0 * * 0"    # 北京 周日 08:30 -> 当天课程
+    - cron: "30 8 * * 0"    # 北京 周日 16:30 -> 当天课程+接送提醒
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 手动触发模式
+        required: true
+        default: sunday_morning
+        type: choice
+        options:
+          - saturday
+          - sunday_morning
+          - sunday_afternoon
+
+jobs:
+  remind:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 周六20:30 - 推送明天(周日)课程+天气
+        if: ${{ github.event.schedule == '30 12 * * 6' }}
+        env:
+          TZ: Asia/Shanghai
+        run: python3 zzjr_reminder.py --mode saturday
+
+      - name: 周日08:30 - 推送当天课程+天气
+        if: ${{ github.event.schedule == '30 0 * * 0' }}
+        env:
+          TZ: Asia/Shanghai
+        run: python3 zzjr_reminder.py --mode sunday_morning
+
+      - name: 周日16:30 - 推送当天课程+天气+接送
+        if: ${{ github.event.schedule == '30 8 * * 0' }}
+        env:
+          TZ: Asia/Shanghai
+        run: python3 zzjr_reminder.py --mode sunday_afternoon
+
+      - name: 手动触发 - 按所选模式
+        if: ${{ github.event_name == 'workflow_dispatch' }}
+        env:
+          TZ: Asia/Shanghai
+        run: python3 zzjr_reminder.py --mode ${{ github.event.inputs.mode }}
