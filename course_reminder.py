@@ -222,6 +222,7 @@ def build_message(mode):
 WEBHOOK = "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=ea5913ef-8fb3-40a2-9e54-67e73e44c326"
 
 def send(text):
+    text = f"{text}\n\n马维斯推送"
     body = json.dumps({"msgtype": "text", "text": {"content": text}}, ensure_ascii=False).encode("utf-8")
     req = urllib.request.Request(WEBHOOK, data=body, headers={"Content-Type": "application/json"})
     with urllib.request.urlopen(req, timeout=20) as r:
