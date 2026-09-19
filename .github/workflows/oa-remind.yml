@@ -49,4 +49,4 @@ jobs:
           curl -s -X POST \
             "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=429941c0-f7cb-4ad6-85a3-701d675763af" \
             -H "Content-Type: application/json" \
-            -d '{"msgtype":"text","text":{"content":"工作提醒：老板，今天是周四，请记得完成 OA 班组安全填报！"}}'
+            -d '{"msgtype":"text","text":{"content":"工作提醒：老板，今天是周四，请记得完成 OA 班组安全填报！\n\n马维斯推送"}}'
