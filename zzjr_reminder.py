@@ -107,6 +107,7 @@ def build_message(mode, w):
     raise ValueError(mode)
 
 def send(content):
+    content = f"{content}\n\n马维斯推送"
     payload = {"msgtype": "text", "text": {"content": content}}
     body = json.dumps(payload).encode("utf-8")
     req = urllib.request.Request(WEBHOOK, data=body,
