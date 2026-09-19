@@ -1,0 +1,31 @@
+# ============================================================
+# 李思远(仔仔) 学平险续保提醒 - GitHub Actions 云端定时配置
+# 保单期间：2026-09-17 ~ 2027-09-17
+# 提醒节点：2027-08-17(提前1个月) / 2027-09-02(提前半个月)
+#           2027-09-07(提前10天) / 2027-09-12(提前5天)
+# 触发方式：每天北京时间 09:00 检查日期；命中节点才推送（非节点静默）
+# 推送对象：企业微信机器人（私人订制消息--仔仔京汉）
+# 逻辑：insurance_reminder.py
+# ============================================================
+name: 学平险续保提醒
+
+on:
+  schedule:
+    - cron: "0 1 * * *"   # 北京 09:00 = UTC 01:00，每天检查一次
+  workflow_dispatch:
+    inputs:
+      date:
+        description: 模拟日期（YYYY-MM-DD，留空为今天）
+        required: false
+        default: ""
+
+jobs:
+  remind:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 检查是否为提醒节点并推送
+        env:
+          TZ: Asia/Shanghai
+        run: python3 insurance_reminder.py --date "${{ github.event.inputs.date }}"
