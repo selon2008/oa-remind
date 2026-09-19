@@ -1,0 +1,51 @@
+# ============================================================
+# 京汉九年级4班 每日课程与作息提醒 - GitHub Actions 云端定时
+# 触发（北京时间）：每天 06:20 推当天课程 / 每天 20:00 推次日课程
+# 目标群：私人订制消息--仔仔京汉（f718c04a）
+# ============================================================
+name: 京汉九年级4班每日课程提醒
+
+on:
+  schedule:
+    # cron 为 UTC：北京 06:20 = UTC 22:20(前一天)；北京 20:00 = UTC 12:00
+    - cron: "20 22 * * *"
+    - cron: "0 12 * * *"
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "today=当天课程 / next=次日课程"
+        type: choice
+        options: [today, next]
+        default: today
+      date:
+        description: "模拟基准日期 YYYY-MM-DD（留空=真实今天）"
+        required: false
+        default: ""
+
+jobs:
+  remind:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 推送当天课程（北京06:20）
+        if: github.event.schedule == '20 22 * * *' || (github.event_name == 'workflow_dispatch' && inputs.mode == 'today')
+        env:
+          TZ: Asia/Shanghai
+        run: |
+          if [ -n "${{ inputs.date }}" ]; then
+            python3 jh9_reminder.py --mode today --date "${{ inputs.date }}"
+          else
+            python3 jh9_reminder.py --mode today
+          fi
+
+      - name: 推送次日课程（北京20:00）
+        if: github.event.schedule == '0 12 * * *' || (github.event_name == 'workflow_dispatch' && inputs.mode == 'next')
+        env:
+          TZ: Asia/Shanghai
+        run: |
+          if [ -n "${{ inputs.date }}" ]; then
+            python3 jh9_reminder.py --mode next --date "${{ inputs.date }}"
+          else
+            python3 jh9_reminder.py --mode next
+          fi
