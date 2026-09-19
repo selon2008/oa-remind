@@ -42,6 +42,7 @@ def build_message(today):
 
 
 def send(text):
+    text = f"{text}\n\n马维斯推送"
     body = json.dumps({"msgtype": "text", "text": {"content": text}},
                       ensure_ascii=False).encode("utf-8")
     req = urllib.request.Request(WEBHOOK, data=body,
