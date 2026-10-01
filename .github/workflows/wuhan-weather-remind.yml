@@ -1,0 +1,22 @@
+# ============================================================
+# 武汉天气速报·每晚20:00（仔仔京汉群 f718c04a）
+# 内容：明天武汉天气速报 + 穿衣/喝水/带伞生活提醒 + 后三天趋势
+# cron UTC 0 12 * * * = 北京 20:00
+# ============================================================
+name: 武汉天气速报提醒
+
+on:
+  schedule:
+    - cron: "0 12 * * *"
+  workflow_dispatch: {}
+
+jobs:
+  remind:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 晚上8点 - 推送武汉天气速报
+        env:
+          TZ: Asia/Shanghai
+        run: python3 wuhan_weather_reminder.py
