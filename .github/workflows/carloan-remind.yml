@@ -1,0 +1,33 @@
+# ============================================================
+# 吉利车贷还款提醒（个人事务群 7debbcf9）
+# 每月还款日 7 号；4号(提前3天)/6号(提前1天)/7号(当天) 各推一次
+# 2026-04-07 ~ 2029-03-07，3333.33元×36期
+# cron UTC 0 1 * * * = 北京 09:00（每天跑，脚本内判断提醒日）
+# ============================================================
+name: 吉利车贷还款提醒
+
+on:
+  schedule:
+    - cron: "0 1 * * *"
+  workflow_dispatch:
+    inputs:
+      date:
+        description: "模拟日期 YYYY-MM-DD（留空=今天）"
+        required: false
+        default: ""
+
+jobs:
+  remind:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 早上9点 - 推送车贷还款提醒
+        env:
+          TZ: Asia/Shanghai
+        run: |
+          if [ -n "${{ inputs.date }}" ]; then
+            python3 carloan_reminder.py --date "${{ inputs.date }}"
+          else
+            python3 carloan_reminder.py
+          fi
