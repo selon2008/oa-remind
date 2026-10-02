@@ -10,7 +10,7 @@ from datetime import date, datetime, timezone, timedelta
 
 WEBHOOK = ("https://qyapi.weixin.qq.com/cgi-bin/webhook/send?"
            "key=f718c04a-ccdb-4eb1-a85c-2a3b311110a7")
-SIGN = "\n\n马维斯推送"
+SIGN = "\n\n马维斯CELL推送"
 CN = timezone(timedelta(hours=8))
 
 EVENING = {
