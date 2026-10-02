@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""广发车主金卡还款提醒（个人事务群 f718c04a）
-每月还款日 4 号；每月 1 号(提前3天)、3 号(提前1天)、4 号(当天) 各推一次。
+"""浦发京东好物联名信用卡还款提醒（个人事务群 f718c04a）
+每月还款日 22 号；每月 19 号(提前3天)、21 号(提前1天)、22 号(当天) 各推一次。
 """
 import argparse, json, sys, urllib.request
 from datetime import date, datetime, timezone, timedelta
@@ -10,8 +10,8 @@ WEBHOOK = ("https://qyapi.weixin.qq.com/cgi-bin/webhook/send?"
            "key=7debbcf9-f8d6-42ae-8928-ed15b167f5ac")
 SIGN = "\n\n马维斯CELL推送"
 CN = timezone(timedelta(hours=8))
-CARD = "广发车主金卡（广发银行信用卡ETC）尾号7792"
-DUE_DAY = 4
+CARD = "浦发京东好物联名信用卡 尾号7632"
+DUE_DAY = 22
 
 def build(today):
     day = today.day
@@ -26,7 +26,7 @@ def build(today):
     lines = [
         head,
         f"本月（{today.year}年{today.month}月）还款日为 {today.month}月{DUE_DAY}日，请记得按时还款，避免逾期影响征信。",
-        "还款渠道：广发银行App、云闪付、绑定储蓄卡自动还款等均可。",
+        "还款渠道：浦发银行App、云闪付、绑定储蓄卡自动还款等均可。",
     ]
     return "\n".join(lines)
 
@@ -47,7 +47,7 @@ def main():
     today = date.fromisoformat(a.date) if a.date else datetime.now(CN).date()
     msg = build(today)
     if msg is None:
-        print(f"今天（{today}）不是提醒日（1/3/4号），跳过")
+        print(f"今天（{today}）不是提醒日（19/21/22号），跳过")
         return 0
     if a.dry_run:
         print(msg)
