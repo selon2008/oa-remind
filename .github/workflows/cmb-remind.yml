@@ -1,0 +1,32 @@
+# ============================================================
+# 招商银行携程信用卡还款提醒（个人事务群 7debbcf9）
+# 每月还款日 13 号；10号(提前3天)/12号(提前1天)/13号(当天) 各推一次
+# cron UTC 0 1 * * * = 北京 09:00（每天跑，脚本内判断提醒日）
+# ============================================================
+name: 招行携程信用卡还款提醒
+
+on:
+  schedule:
+    - cron: "0 1 * * *"
+  workflow_dispatch:
+    inputs:
+      date:
+        description: "模拟日期 YYYY-MM-DD（留空=今天）"
+        required: false
+        default: ""
+
+jobs:
+  remind:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 早上9点 - 推送信用卡还款提醒
+        env:
+          TZ: Asia/Shanghai
+        run: |
+          if [ -n "${{ inputs.date }}" ]; then
+            python3 cmb_reminder.py --date "${{ inputs.date }}"
+          else
+            python3 cmb_reminder.py
+          fi
