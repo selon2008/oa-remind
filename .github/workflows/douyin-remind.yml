@@ -1,0 +1,32 @@
+# ============================================================
+# 抖音月付还款提醒（个人事务群 7debbcf9）
+# 每月还款日 15 号；12号(提前3天)/14号(提前1天)/15号(当天) 各推一次
+# cron UTC 0 1 * * * = 北京 09:00（每天跑，脚本内判断提醒日）
+# ============================================================
+name: 抖音月付还款提醒
+
+on:
+  schedule:
+    - cron: "0 1 * * *"
+  workflow_dispatch:
+    inputs:
+      date:
+        description: "模拟日期 YYYY-MM-DD（留空=今天）"
+        required: false
+        default: ""
+
+jobs:
+  remind:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 早上9点 - 推送抖音月付还款提醒
+        env:
+          TZ: Asia/Shanghai
+        run: |
+          if [ -n "${{ inputs.date }}" ]; then
+            python3 douyin_reminder.py --date "${{ inputs.date }}"
+          else
+            python3 douyin_reminder.py
+          fi
