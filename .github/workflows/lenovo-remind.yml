@@ -1,0 +1,32 @@
+# ============================================================
+# 联想Y9000P售后服务到期提醒（个人事务群）
+# 每项服务到期前 30天/15天/1天 各推一次
+# cron UTC 0 1 * * * = 北京 09:00（每天跑，脚本内判断提醒节点）
+# ============================================================
+name: 联想售后服务到期提醒
+
+on:
+  schedule:
+    - cron: "0 1 * * *"
+  workflow_dispatch:
+    inputs:
+      date:
+        description: "模拟日期 YYYY-MM-DD（留空=今天）"
+        required: false
+        default: ""
+
+jobs:
+  remind:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 早上9点 - 推送联想售后服务到期提醒
+        env:
+          TZ: Asia/Shanghai
+        run: |
+          if [ -n "${{ inputs.date }}" ]; then
+            python3 lenovo_reminder.py --date "${{ inputs.date }}"
+          else
+            python3 lenovo_reminder.py
+          fi
