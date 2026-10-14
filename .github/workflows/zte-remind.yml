@@ -6,8 +6,6 @@
 name: 中兴随身WiFi充值提醒
 
 on:
-  schedule:
-    - cron: "0 1 * * *"
   workflow_dispatch:
     inputs:
       date:
