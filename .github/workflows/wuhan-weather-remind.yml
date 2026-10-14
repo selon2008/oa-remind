@@ -6,8 +6,6 @@
 name: 武汉天气速报提醒
 
 on:
-  schedule:
-    - cron: "0 12 * * *"
   workflow_dispatch: {}
 
 jobs:
