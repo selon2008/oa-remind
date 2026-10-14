@@ -6,8 +6,6 @@
 name: 平安信用卡还款提醒
 
 on:
-  schedule:
-    - cron: "0 1 * * *"
   workflow_dispatch:
     inputs:
       date:
