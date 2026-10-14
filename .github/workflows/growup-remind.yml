@@ -7,10 +7,6 @@
 name: 巨人培优国庆上课安排提醒
 
 on:
-  schedule:
-    # cron 为 UTC：北京 20:00 = UTC 12:00；北京 06:20 = UTC 22:20(前一天)
-    - cron: "0 12 * * *"
-    - cron: "20 22 * * *"
   workflow_dispatch:
     inputs:
       mode:
@@ -29,24 +25,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: 晚8点档（10/6、10/9）
-        if: github.event.schedule == '0 12 * * *' || (github.event_name == 'workflow_dispatch' && inputs.mode == 'evening')
+      - name: 推送上课安排提醒（cron-job.org 外部触发）
         env:
           TZ: Asia/Shanghai
         run: |
           if [ -n "${{ inputs.date }}" ]; then
-            python3 growup_reminder.py --mode evening --date "${{ inputs.date }}"
+            python3 growup_reminder.py --mode ${{ inputs.mode }} --date "${{ inputs.date }}"
           else
-            python3 growup_reminder.py --mode evening
-          fi
-
-      - name: 早6点20档（10/10）
-        if: github.event.schedule == '20 22 * * *' || (github.event_name == 'workflow_dispatch' && inputs.mode == 'morning')
-        env:
-          TZ: Asia/Shanghai
-        run: |
-          if [ -n "${{ inputs.date }}" ]; then
-            python3 growup_reminder.py --mode morning --date "${{ inputs.date }}"
-          else
-            python3 growup_reminder.py --mode morning
+            python3 growup_reminder.py --mode ${{ inputs.mode }}
           fi
