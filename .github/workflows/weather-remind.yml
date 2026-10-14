@@ -8,8 +8,6 @@
 name: 次日秦皇岛天气提醒
 
 on:
-  schedule:
-    - cron: "0 12 * * *"   # 北京 20:00 -> 次日天气
   workflow_dispatch: {}
 
 jobs:
