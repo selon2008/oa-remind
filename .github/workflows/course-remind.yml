@@ -10,13 +10,10 @@
 name: 课程每日提醒
 
 on:
-  schedule:
-    - cron: "0 23 * * *"   # 北京 07:00 -> 当天课程
-    - cron: "0 11 * * *"   # 北京 19:00 -> 明天课程
   workflow_dispatch:
     inputs:
       mode:
-        description: 手动触发模式
+        description: today=当天课程 / tomorrow=明天课程
         required: true
         default: today
         type: choice
@@ -30,20 +27,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: 早上7点 - 推送当天课程
-        if: ${{ github.event.schedule == '0 23 * * *' }}
+      - name: 推送课程提醒（cron-job.org 外部触发）
         env:
           TZ: Asia/Shanghai
-        run: python3 course_reminder.py --mode today
-
-      - name: 晚上7点 - 推送明天课程
-        if: ${{ github.event.schedule == '0 11 * * *' }}
-        env:
-          TZ: Asia/Shanghai
-        run: python3 course_reminder.py --mode tomorrow
-
-      - name: 手动触发 - 按所选模式
-        if: ${{ github.event_name == 'workflow_dispatch' }}
-        env:
-          TZ: Asia/Shanghai
-        run: python3 course_reminder.py --mode ${{ github.event.inputs.mode }}
+        run: python3 course_reminder.py --mode ${{ inputs.mode }}
