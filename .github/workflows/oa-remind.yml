@@ -7,9 +7,6 @@
 name: OA安全填报周四提醒
 
 on:
-  schedule:
-    # cron 使用 UTC 时间；北京 09:00 = UTC 01:00, 北京 15:00 = UTC 07:00, 每周四
-    - cron: "0 1,7 * * 4"
   workflow_dispatch: {}   # 支持手动触发，便于测试
 
 jobs:
