@@ -1,0 +1,29 @@
+# ============================================================
+# 美团还款 20 万提醒（个人事务群 7debbcf9）
+# 2026年11月3号、4号各推一次；cron-job.org 北京时间 09:00 触发
+# ============================================================
+name: 美团还款20万提醒
+
+on:
+  workflow_dispatch:
+    inputs:
+      date:
+        description: "模拟日期 YYYY-MM-DD（留空=今天）"
+        required: false
+        default: ""
+
+jobs:
+  remind:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 早上9点 - 推送美团还款20万提醒
+        env:
+          TZ: Asia/Shanghai
+        run: |
+          if [ -n "${{ inputs.date }}" ]; then
+            python3 meituan20w_reminder.py --date "${{ inputs.date }}"
+          else
+            python3 meituan20w_reminder.py
+          fi
